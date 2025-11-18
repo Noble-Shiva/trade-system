@@ -15,6 +15,7 @@ This system automates F&O trading operations using proven strategies, dynamic ri
 
 ## Quick Links
 
+- **[⭐ Micro-Capital Plan (₹5K-₹10K)](./MICRO_CAPITAL_PLAN.md)** - **START HERE!** Optimized plan for small capital
 - **[Complete Plan & Documentation](./TRADING_SYSTEM_PLAN.md)** - Comprehensive 14,000+ word plan covering everything
 - **[Implementation Roadmap](#implementation-roadmap)** - Phase-by-phase development guide
 - **[Getting Started](#getting-started)** - Setup instructions

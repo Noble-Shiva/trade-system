@@ -14,10 +14,10 @@ pyyaml>=6.0
 jugaad-data>=0.21
 nsepython>=2.0
 
-# Broker APIs (uncomment the one you need)
-# kiteconnect>=4.2.0  # Zerodha Kite Connect
+# Broker APIs
+smartapi-python>=1.3.0  # Angel One Smart API (FREE - RECOMMENDED for micro-capital)
+# kiteconnect>=4.2.0  # Zerodha Kite Connect (₹2000/month)
 # upstox-python>=2.5.0  # Upstox API
-# smartapi-python>=1.3.0  # Angel One Smart API
 
 # Backtesting Frameworks
 backtesting>=0.3.3

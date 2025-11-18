@@ -11,17 +11,19 @@ general:
 # Trading Settings
 trading:
   # Capital Settings
-  initial_capital: 100000  # Initial trading capital in INR
+  initial_capital: 10000  # Initial trading capital in INR (₹5K-₹10K for micro-capital)
 
-  # Position Sizing
-  max_position_size_pct: 2  # Maximum 2% of capital per trade
-  position_sizing_method: fixed_fractional  # Options: fixed_fractional, atr_based, volatility_adjusted
+  # Position Sizing (Adjusted for Micro-Capital)
+  max_position_size_pct: 75  # For options buying with small capital (₹7,500 on ₹10K)
+  position_sizing_method: fixed_amount  # For micro-capital, use fixed amounts
 
-  # Risk Management
-  max_daily_loss_pct: 5  # Stop trading if daily loss exceeds 5%
+  # Risk Management (Adjusted for Small Capital)
+  max_daily_loss_pct: 5  # Stop trading if daily loss exceeds 5% (₹500 on ₹10K)
+  max_daily_loss_amount: 500  # Absolute daily loss limit in INR
+  max_weekly_loss_amount: 1000  # Absolute weekly loss limit in INR
   max_drawdown_pct: 15  # Alert if drawdown exceeds 15%
-  max_open_positions: 5  # Maximum number of concurrent positions
-  max_correlated_positions: 3  # Maximum highly correlated positions
+  max_open_positions: 2  # Maximum 2 concurrent positions for micro-capital
+  max_correlated_positions: 1  # Avoid correlation with small capital
 
   # Stop Loss Settings
   default_stop_loss_pct: 2  # Default stop loss percentage
@@ -41,11 +43,13 @@ trading:
 
 # Broker Settings (Fill from .env for security)
 broker:
-  name: angel_one  # Options: zerodha, upstox, angel_one
-  api_key: ${BROKER_API_KEY}  # Will be loaded from .env
-  api_secret: ${BROKER_API_SECRET}
+  name: angel_one  # Angel One for FREE API and data (recommended for micro-capital)
+  api_key: ${ANGEL_API_KEY}  # Will be loaded from .env
+  client_id: ${ANGEL_CLIENT_ID}
+  password: ${ANGEL_PASSWORD}  # For login
+  totp_secret: ${ANGEL_TOTP_SECRET}  # For 2FA
   api_version: "v1"
-  paper_trading: true
+  paper_trading: true  # Set to false for live trading
 
 # Strategy Settings
 strategies:
@@ -87,17 +91,23 @@ market_regime:
   high_vix_threshold: 20  # VIX > 20 = high volatility
   low_vix_threshold: 15  # VIX < 15 = low volatility
 
-# Instruments to Trade
+# Instruments to Trade (Optimized for Micro-Capital)
 instruments:
+  # Focus on Index Options (Best liquidity, lower premiums for weekly)
   indices:
-    - NIFTY
-    - BANKNIFTY
-  stocks:
-    - RELIANCE
-    - TCS
-    - INFY
-    - HDFCBANK
-    - ICICIBANK
+    - NIFTY  # Weekly options - expires every Thursday
+    - BANKNIFTY  # Weekly options - expires every Wednesday
+
+  # Avoid stock options initially (higher premiums, lower liquidity)
+  stocks: []  # Enable after scaling to ₹50K+
+
+  # Options Configuration (For Micro-Capital)
+  options:
+    prefer_weekly: true  # Weekly options have lower premiums
+    max_days_to_expiry: 7  # Only trade current week expiry
+    min_days_to_expiry: 1  # Avoid expiry day (too risky)
+    strike_selection: ATM_OTM  # At-the-money or 1 strike out-of-the-money
+    option_type: buying_only  # Only buy options (not sell) with small capital
 
   # Instrument filters
   min_volume: 1000000  # Minimum daily volume
@@ -105,14 +115,16 @@ instruments:
 
 # Data Settings
 data:
-  # Historical data
-  historical_data_source: jugaad  # Options: jugaad, nsepython, broker
-  historical_years: 5
+  # Historical data (FREE from Angel One!)
+  historical_data_source: angel_one  # Use Angel One for free historical data
+  historical_years: 5  # Download 5 years for backtesting
   data_directory: data/historical
+  backup_source: jugaad  # Fallback if Angel One API fails
 
-  # Real-time data
-  realtime_source: broker  # Options: broker, websocket
-  tick_interval: 1  # seconds
+  # Real-time data (FREE from Angel One!)
+  realtime_source: angel_one  # WebSocket from Angel One
+  tick_interval: 1  # Get ticks every second
+  use_websocket: true  # Use WebSocket for lower latency
 
   # Data quality
   handle_missing_data: interpolate  # Options: drop, interpolate, forward_fill
