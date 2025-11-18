@@ -1,0 +1,267 @@
+# Trading System Configuration
+# Copy this file to config.yaml and fill in your actual values
+# DO NOT commit config.yaml to version control
+
+# General Settings
+general:
+  mode: paper  # Options: paper, live
+  timezone: Asia/Kolkata
+  log_level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# Trading Settings
+trading:
+  # Capital Settings
+  initial_capital: 100000  # Initial trading capital in INR
+
+  # Position Sizing
+  max_position_size_pct: 2  # Maximum 2% of capital per trade
+  position_sizing_method: fixed_fractional  # Options: fixed_fractional, atr_based, volatility_adjusted
+
+  # Risk Management
+  max_daily_loss_pct: 5  # Stop trading if daily loss exceeds 5%
+  max_drawdown_pct: 15  # Alert if drawdown exceeds 15%
+  max_open_positions: 5  # Maximum number of concurrent positions
+  max_correlated_positions: 3  # Maximum highly correlated positions
+
+  # Stop Loss Settings
+  default_stop_loss_pct: 2  # Default stop loss percentage
+  trailing_stop_enabled: true
+  trailing_stop_pct: 1.5  # Trail by 1.5%
+  move_to_breakeven_at: 1.5  # Move SL to breakeven after 1.5R profit
+
+  # Take Profit Settings
+  risk_reward_ratio: 2  # Minimum 2:1 reward to risk
+  partial_profit_at: 2  # Take 50% profit at 2R
+
+  # Trading Hours
+  pre_market_start: "09:00"
+  market_open: "09:15"
+  market_close: "15:30"
+  stop_new_trades_at: "15:00"  # Don't take new positions in last 30 mins
+
+# Broker Settings (Fill from .env for security)
+broker:
+  name: angel_one  # Options: zerodha, upstox, angel_one
+  api_key: ${BROKER_API_KEY}  # Will be loaded from .env
+  api_secret: ${BROKER_API_SECRET}
+  api_version: "v1"
+  paper_trading: true
+
+# Strategy Settings
+strategies:
+  # Enable/disable strategies
+  momentum:
+    enabled: true
+    lookback_period: 90  # 3 months
+    entry_threshold: 0.05  # 5% momentum
+    exit_threshold: -0.02  # -2% reverse momentum
+
+  mean_reversion:
+    enabled: true
+    lookback_period: 20
+    entry_zscore: 2.0  # Enter when z-score > 2 or < -2
+    exit_zscore: 0.5  # Exit when z-score crosses 0.5
+    rsi_threshold: 30  # RSI confirmation
+
+  volatility_breakout:
+    enabled: true
+    atr_multiplier: 2.0  # Entry when price breaks 2x ATR
+    atr_period: 14
+    volume_confirmation: true
+
+  options_premium:
+    enabled: false  # Enable after backtesting
+    min_days_to_expiry: 7
+    max_days_to_expiry: 21
+    otm_strike_distance: 3  # 3 strikes out of the money
+    max_loss_pct: 50  # Exit if loss exceeds 50% of premium
+
+  # Strategy Selection
+  auto_strategy_selection: true
+  market_regime_detection: true
+
+# Market Regime Detection
+market_regime:
+  trending_adx_threshold: 25  # ADX > 25 = trending
+  mean_reverting_adx_threshold: 20  # ADX < 20 = mean reverting
+  high_vix_threshold: 20  # VIX > 20 = high volatility
+  low_vix_threshold: 15  # VIX < 15 = low volatility
+
+# Instruments to Trade
+instruments:
+  indices:
+    - NIFTY
+    - BANKNIFTY
+  stocks:
+    - RELIANCE
+    - TCS
+    - INFY
+    - HDFCBANK
+    - ICICIBANK
+
+  # Instrument filters
+  min_volume: 1000000  # Minimum daily volume
+  min_liquidity: 5000000  # Minimum daily turnover in INR
+
+# Data Settings
+data:
+  # Historical data
+  historical_data_source: jugaad  # Options: jugaad, nsepython, broker
+  historical_years: 5
+  data_directory: data/historical
+
+  # Real-time data
+  realtime_source: broker  # Options: broker, websocket
+  tick_interval: 1  # seconds
+
+  # Data quality
+  handle_missing_data: interpolate  # Options: drop, interpolate, forward_fill
+  outlier_detection: true
+  outlier_threshold: 5  # Standard deviations
+
+# Database Settings
+database:
+  # PostgreSQL for application data
+  postgres:
+    host: localhost
+    port: 5432
+    database: trading_system
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  # InfluxDB for time-series data (optional)
+  influxdb:
+    enabled: false
+    host: localhost
+    port: 8086
+    database: market_data
+    token: ${INFLUX_TOKEN}
+
+# Backtesting Settings
+backtesting:
+  start_date: "2020-01-01"
+  end_date: "2024-12-31"
+  commission: 0.0003  # 0.03% per trade
+  slippage: 0.0001  # 0.01% slippage
+
+  # Optimization
+  optimization_method: grid_search  # Options: grid_search, random_search, bayesian
+  cross_validation_folds: 5
+
+  # Performance metrics
+  min_sharpe_ratio: 1.5
+  max_drawdown: 20
+  min_win_rate: 45
+
+# Notifications
+notifications:
+  # Telegram
+  telegram:
+    enabled: true
+    bot_token: ${TELEGRAM_BOT_TOKEN}
+    chat_id: ${TELEGRAM_CHAT_ID}
+
+    # What to notify
+    notify_on_trade: true
+    notify_on_daily_summary: true
+    notify_on_risk_breach: true
+    notify_on_error: true
+    notify_on_circuit_breaker: true
+
+  # Email (optional)
+  email:
+    enabled: false
+    smtp_server: smtp.gmail.com
+    smtp_port: 587
+    from_email: ${EMAIL_FROM}
+    to_email: ${EMAIL_TO}
+    password: ${EMAIL_PASSWORD}
+
+# Logging
+logging:
+  log_directory: logs
+  log_file: trading_system.log
+  max_file_size: 10485760  # 10 MB
+  backup_count: 10
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  # What to log
+  log_trades: true
+  log_signals: true
+  log_orders: true
+  log_positions: true
+  log_pnl: true
+  log_errors: true
+
+# Monitoring
+monitoring:
+  heartbeat_interval: 60  # seconds
+  health_check_interval: 300  # seconds
+
+  # Alerts
+  alert_on_api_failure: true
+  alert_on_data_gap: true
+  alert_on_system_error: true
+
+  # Performance monitoring
+  track_execution_time: true
+  track_memory_usage: true
+  track_api_latency: true
+
+# Circuit Breakers
+circuit_breakers:
+  # Daily loss limit
+  daily_loss:
+    enabled: true
+    threshold_pct: 5  # Stop trading if daily loss > 5%
+
+  # Consecutive losses
+  consecutive_losses:
+    enabled: true
+    threshold: 3  # Stop after 3 consecutive losses
+
+  # System errors
+  system_errors:
+    enabled: true
+    threshold: 5  # Stop after 5 consecutive errors
+
+  # Manual kill switch
+  manual_override: false  # Set to true to stop all trading immediately
+
+# Compliance
+compliance:
+  # SEBI compliance
+  maintain_audit_trail: true
+  audit_trail_directory: audit
+
+  # Tax tracking
+  track_for_tax: true
+  tax_rate: 0.30  # 30% for F&O profits
+
+# Advanced Settings
+advanced:
+  # Options Greeks calculation
+  greeks:
+    risk_free_rate: 0.065  # 6.5% (current RBI repo rate)
+    dividend_yield: 0.01  # 1% average dividend yield
+
+  # Machine learning (for future use)
+  ml:
+    enabled: false
+    model_type: random_forest
+    retrain_frequency_days: 30
+
+  # Multi-threading
+  parallel_processing: true
+  max_workers: 4
+
+  # Cache
+  cache_enabled: true
+  cache_ttl: 300  # seconds
+
+# Development Settings
+development:
+  debug_mode: false
+  test_mode: false
+  mock_broker_api: false
+  save_debug_data: false

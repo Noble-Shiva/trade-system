@@ -1,0 +1,99 @@
+# Core Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# HTTP Requests
+requests>=2.31.0
+
+# Configuration Management
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# Indian Market Data Sources
+jugaad-data>=0.21
+nsepython>=2.0
+
+# Broker APIs (uncomment the one you need)
+# kiteconnect>=4.2.0  # Zerodha Kite Connect
+# upstox-python>=2.5.0  # Upstox API
+# smartapi-python>=1.3.0  # Angel One Smart API
+
+# Backtesting Frameworks
+backtesting>=0.3.3
+# backtrader>=1.9.78.123  # Alternative backtesting framework
+
+# Technical Analysis
+# Note: TA-Lib requires system-level installation first
+# On Ubuntu: sudo apt-get install ta-lib
+# On Mac: brew install ta-lib
+# On Windows: Download from https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib
+TA-Lib>=0.4.28
+pandas-ta>=0.3.14b
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+mplfinance>=0.12.0
+plotly>=5.14.0
+bokeh>=3.1.0
+
+# Database
+psycopg2-binary>=2.9.6  # PostgreSQL
+influxdb-client>=1.36.0  # InfluxDB for time-series data
+# sqlalchemy>=2.0.0  # ORM (optional)
+
+# Notifications
+python-telegram-bot>=20.0
+
+# Task Scheduling
+schedule>=1.2.0
+APScheduler>=3.10.0
+
+# Utilities
+pytz>=2023.3  # Timezone handling
+python-dateutil>=2.8.2
+
+# Testing
+pytest>=7.3.0
+pytest-cov>=4.1.0
+
+# Code Quality
+black>=23.3.0  # Code formatter
+flake8>=6.0.0  # Linter
+mypy>=1.3.0  # Type checker
+
+# Logging
+colorlog>=6.7.0  # Colored logging
+
+# Financial Calculations
+py_vollib>=1.0.1  # Options pricing and Greeks
+# quantlib>=1.30  # Advanced financial calculations (optional)
+
+# Performance
+numba>=0.57.0  # JIT compilation for speed
+
+# Jupyter (for research and analysis)
+jupyter>=1.0.0
+ipython>=8.12.0
+notebook>=6.5.4
+
+# API Rate Limiting
+ratelimit>=2.2.1
+
+# Retry Logic
+tenacity>=8.2.2
+
+# Environment
+python-decouple>=3.8
+
+# Web Dashboard (optional)
+# flask>=2.3.0
+# dash>=2.10.0
+# streamlit>=1.22.0
+
+# Data Validation
+pydantic>=2.0.0
+
+# Progress Bars
+tqdm>=4.65.0
