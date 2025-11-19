@@ -30,16 +30,16 @@ strategies:
 
   iron_condor:
     enabled: true
-    min_premium: 50
-    max_spread_width: 500
-    delta_range: [0.15, 0.25]
-    days_to_expiry: [7, 21]
+    min_premium: 15           # Lower premium for cheaper options (₹15-60)
+    max_spread_width: 200
+    delta_range: [0.08, 0.15] # Further OTM = cheaper premiums
+    days_to_expiry: [3, 7]    # Weekly options = cheaper
 
   bull_put_spread:
     enabled: true
-    min_premium: 30
-    spread_width: 100
-    delta: 0.30
+    min_premium: 10           # Target ₹10-50 range options
+    spread_width: 50          # Smaller spread = less margin
+    delta: 0.10               # Further OTM = cheaper
 
 risk:
   max_capital_per_trade_pct: 5.0
@@ -58,8 +58,8 @@ stop_loss:
     closing_multiplier: 1.2
 
 capital:
-  initial: 100000
-  per_lot_margin: 15000
+  initial: 10000            # Your starting capital
+  per_lot_margin: 5000      # Lower margin for cheaper OTM options
 
 database:
   type: "postgresql"
