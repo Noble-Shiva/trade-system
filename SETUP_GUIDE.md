@@ -69,6 +69,55 @@ pip install -r requirements.txt
      name: "angel"
    ```
 
+#### Option C: Groww (Free API)
+
+1. **Get API Access**
+   - Login to [Groww Trade API](https://groww.in/trade-api)
+   - Go to [API Keys page](https://groww.in/trade-api/api-keys)
+   - Create API Key and Secret
+
+2. **Choose Authentication Method**
+
+   **Method 1: TOTP (Recommended for automation)**
+   - Scan QR code with authenticator app
+   - Get TOTP secret from Groww
+
+   ```
+   BROKER_API_KEY=your_groww_api_key
+   BROKER_API_SECRET=not_needed_for_totp
+   GROWW_TOTP_SECRET=your_totp_secret
+   ```
+
+   **Method 2: API Key + Secret**
+   - Requires daily approval on Groww Cloud API Keys page
+
+   ```
+   BROKER_API_KEY=your_groww_api_key
+   BROKER_API_SECRET=your_groww_secret
+   ```
+
+3. **Update Config**
+   ```yaml
+   broker:
+     name: "groww"
+   ```
+
+4. **Install Groww SDK**
+   ```bash
+   pip install growwapi pyotp
+   ```
+
+**Features:**
+- ✅ Free API access
+- ✅ Equity, F&O, Commodity support
+- ✅ Option chain with Greeks
+- ✅ Up to 15 orders/sec
+
+**Rate Limits:**
+- Orders: 15/sec, 250/min
+- Live Data: 10/sec, 300/min
+- Position/Status: 20/sec, 500/min
+
 ---
 
 ## Telegram Notifications Setup

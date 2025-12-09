@@ -5,6 +5,7 @@ Broker Factory - Create broker instances from configuration
 from .base import BrokerBase
 from .zerodha import ZerodhaBroker
 from .angel import AngelOneBroker
+from .groww import GrowwBroker
 
 
 class BrokerFactory:
@@ -13,6 +14,7 @@ class BrokerFactory:
     _brokers = {
         "zerodha": ZerodhaBroker,
         "angel": AngelOneBroker,
+        "groww": GrowwBroker,
         # Add more brokers here
         # "fyers": FyersBroker,
         # "upstox": UpstoxBroker,

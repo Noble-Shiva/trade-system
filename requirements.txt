@@ -12,6 +12,8 @@ websocket-client>=1.6.0
 
 # Broker APIs
 kiteconnect>=5.0.0
+growwapi>=0.1.0
+pyotp>=2.9.0  # For TOTP authentication (Angel One, Groww)
 # fyers-apiv3  # Uncomment when using Fyers
 # smartapi-python  # Uncomment when using Angel One
 
