@@ -134,9 +134,16 @@ class BacktestEngine:
             index_data = self.data_loader.download_index_data(symbol, start_date, end_date)
             option_data = self.data_loader.generate_synthetic_option_data(index_data, symbol)
 
-        # Filter by date range
+        # Filter by date range (handle timezone-aware dates)
         start_dt = pd.to_datetime(start_date)
         end_dt = pd.to_datetime(end_date)
+        
+        # Ensure dates are tz-naive for comparison
+        if index_data['date'].dt.tz is not None:
+            index_data['date'] = index_data['date'].dt.tz_localize(None)
+        if option_data['date'].dt.tz is not None:
+            option_data['date'] = option_data['date'].dt.tz_localize(None)
+        
         index_data = index_data[(index_data['date'] >= start_dt) & (index_data['date'] <= end_dt)]
 
         # Initialize strategy
@@ -183,12 +190,28 @@ class BacktestEngine:
             self.daily_returns.append(daily_return)
             prev_capital = self.capital
 
-        # Close any remaining positions
+        # Close any remaining positions at estimated option prices
         if self.positions:
+            import re
             last_date = index_data.iloc[-1]['date']
-            last_price = index_data.iloc[-1]['close']
+            last_spot = index_data.iloc[-1]['close']
             for pos in self.positions[:]:
-                self._close_position(pos, last_price, "End of backtest", last_date)
+                # Calculate intrinsic value at close
+                symbol = pos.get("symbol", "")
+                is_put = "PE" in symbol
+                match = re.search(r'(\d+)(PE|CE)', symbol)
+                
+                if match:
+                    strike = float(match.group(1))
+                    if is_put:
+                        intrinsic = max(0, strike - last_spot)
+                    else:
+                        intrinsic = max(0, last_spot - strike)
+                    estimated_close = max(0.05, intrinsic)
+                else:
+                    estimated_close = 0.05
+                    
+                self._close_position(pos, estimated_close, "End of backtest", last_date)
 
         # Calculate metrics
         result = self._calculate_results(start_date, end_date)
@@ -268,8 +291,45 @@ class BacktestEngine:
     def _check_exits(self, market_data: dict):
         """Check if any positions should be exited"""
         spot_price = market_data["spot_price"]
+        trade_date = market_data.get("date")
 
         for pos in self.positions[:]:
+            # Check for weekly expiry (close after 7 days)
+            if trade_date is not None:
+                entry_date = pos.get("entry_date")
+                if entry_date is not None:
+                    entry_dt = pd.to_datetime(entry_date) if isinstance(entry_date, str) else entry_date
+                    trade_dt = pd.to_datetime(trade_date) if isinstance(trade_date, str) else trade_date
+                    days_held = (trade_dt - entry_dt).days
+                    if days_held >= 7:  # Weekly expiry
+                        # Calculate expiry value based on ITM/OTM
+                        symbol = pos.get("symbol", "")
+                        strike = None
+                        is_put = "PE" in symbol
+                        is_call = "CE" in symbol
+                        
+                        # Extract strike from symbol (e.g., NIFTY21550PE)
+                        import re
+                        match = re.search(r'(\d+)(PE|CE)', symbol)
+                        if match:
+                            strike = float(match.group(1))
+                        
+                        if strike is not None:
+                            # Calculate intrinsic value at expiry
+                            if is_put:
+                                # Put: max(0, strike - spot)
+                                intrinsic = max(0, strike - spot_price)
+                            else:
+                                # Call: max(0, spot - strike)
+                                intrinsic = max(0, spot_price - strike)
+                            
+                            expiry_price = max(0.05, intrinsic)  # Min 0.05 for worthless options
+                        else:
+                            # Fallback: assume expires worthless (OTM)
+                            expiry_price = 0.05
+                        
+                        self._close_position(pos, expiry_price, "Weekly expiry", trade_date)
+                        continue
             # Estimate current option price based on spot movement
             # This is simplified - real implementation would use the option chain
             entry = pos["entry_price"]

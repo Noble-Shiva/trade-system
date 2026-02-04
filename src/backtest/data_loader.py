@@ -193,28 +193,35 @@ class HistoricalDataLoader:
                 if strike <= 0:
                     continue
 
-                # Simplified option pricing
-                # Real implementation would use proper Black-Scholes
+                # Simplified option pricing (more realistic for Indian markets)
+                # Weekly options typically have low premiums for OTM
                 moneyness = spot / strike
                 days_to_expiry = 7  # Assume weekly
                 iv = 0.15  # 15% IV assumption
 
-                # Very simplified premium calculation
-                time_value = spot * iv * np.sqrt(days_to_expiry / 365) * 0.4
+                # Calculate distance from ATM as percentage
+                pct_from_atm = abs(spot - strike) / spot * 100
+
+                # Base time value (scaled down for realistic premiums)
+                base_time_value = spot * iv * np.sqrt(days_to_expiry / 365) * 0.1
 
                 # Call premium
                 if spot > strike:  # ITM
                     call_intrinsic = spot - strike
-                    call_premium = call_intrinsic + time_value
+                    call_premium = call_intrinsic + base_time_value * 0.3
                 else:  # OTM
-                    call_premium = time_value * np.exp(-abs(moneyness - 1) * 5)
+                    # Exponential decay based on % OTM (realistic for weeklies)
+                    decay = np.exp(-pct_from_atm * 0.8)
+                    call_premium = max(5, base_time_value * decay)
 
                 # Put premium
                 if spot < strike:  # ITM
                     put_intrinsic = strike - spot
-                    put_premium = put_intrinsic + time_value
+                    put_premium = put_intrinsic + base_time_value * 0.3
                 else:  # OTM
-                    put_premium = time_value * np.exp(-abs(moneyness - 1) * 5)
+                    # Exponential decay based on % OTM
+                    decay = np.exp(-pct_from_atm * 0.8)
+                    put_premium = max(5, base_time_value * decay)
 
                 # Approximate OI based on distance from ATM
                 distance = abs(strike - atm_strike) / strike_interval

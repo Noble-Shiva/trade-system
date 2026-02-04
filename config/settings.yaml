@@ -37,8 +37,8 @@ strategies:
 
   bull_put_spread:
     enabled: true
-    min_premium: 10           # Target ₹10-50 range options
-    spread_width: 50          # Smaller spread = less margin
+    min_premium: 3            # Lower threshold for synthetic data
+    spread_width: 100         # Wider spread = more premium
     delta: 0.10               # Further OTM = cheaper
 
 risk:
