@@ -354,8 +354,21 @@ class BacktestEngine:
             if pnl < pos["max_loss"]:
                 pos["max_loss"] = pnl
 
-            # Check stop loss
-            if pos["side"] == "SELL" and current_price >= pos["stop_loss"]:
+            # Update trailing stop loss using DynamicStopLoss manager
+            position_type = "SHORT" if pos["side"] == "SELL" else "LONG"
+            new_sl = self.stop_loss_manager.update_trailing_sl(
+                entry_price=entry,
+                current_price=current_price,
+                current_sl=pos["stop_loss"],
+                position_type=position_type
+            )
+            
+            if new_sl.price != pos["stop_loss"] and "No change" not in new_sl.reason:
+                logger.debug(f"SL updated: {pos['stop_loss']:.2f} -> {new_sl.price:.2f} ({new_sl.reason})")
+                pos["stop_loss"] = new_sl.price
+
+            # Check stop loss using DynamicStopLoss
+            if self.stop_loss_manager.should_exit(current_price, pos["stop_loss"], position_type):
                 self._close_position(pos, current_price, "Stop loss hit", market_data["date"])
                 continue
 
