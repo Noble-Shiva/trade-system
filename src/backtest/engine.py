@@ -13,6 +13,7 @@ from .metrics import PerformanceMetrics
 from ..strategies import IronCondorStrategy, BullPutSpreadStrategy, BearCallSpreadStrategy
 from ..risk import RiskManager, DynamicStopLoss
 from ..data.option_chain import OptionChainAnalyzer
+from ..utils.indicators import detect_trend, get_trading_signals
 
 
 @dataclass
@@ -164,12 +165,25 @@ class BacktestEngine:
             # Build option chain
             chain_data = self._build_chain_from_data(day_options)
 
+            # Calculate trend using technical indicators
+            # Get price history up to current date
+            prices_so_far = index_data.loc[:idx, 'close']
+            if len(prices_so_far) >= 21:
+                signals_info = get_trading_signals(prices_so_far)
+                trend = signals_info["trend"]
+                rsi = signals_info["rsi"]
+            else:
+                trend = "neutral"
+                rsi = 50
+
             market_data = {
                 "symbol": symbol,
                 "spot_price": spot_price,
                 "option_chain": chain_data,
                 "vix": 15,  # Assume moderate VIX
-                "date": current_date
+                "date": current_date,
+                "trend": trend,
+                "rsi": rsi
             }
 
             # Check exit conditions for existing positions
