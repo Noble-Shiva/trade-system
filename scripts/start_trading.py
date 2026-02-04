@@ -65,11 +65,12 @@ def main():
     logger.info("=" * 50)
 
     if args.paper:
-        logger.info("Running in PAPER TRADING mode")
+        logger.info("🔶 Running in PAPER TRADING mode")
+        logger.info("⚠️  No real money will be used")
 
     try:
         # Initialize and start trading
-        orchestrator = TradingOrchestrator(args.config)
+        orchestrator = TradingOrchestrator(args.config, paper_mode=args.paper)
         orchestrator.start()
 
     except FileNotFoundError as e:

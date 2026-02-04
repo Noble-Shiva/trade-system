@@ -6,6 +6,7 @@ from .base import BrokerBase
 from .zerodha import ZerodhaBroker
 from .angel import AngelOneBroker
 from .groww import GrowwBroker
+from .paper import PaperBroker
 
 
 class BrokerFactory:
@@ -15,31 +16,44 @@ class BrokerFactory:
         "zerodha": ZerodhaBroker,
         "angel": AngelOneBroker,
         "groww": GrowwBroker,
+        "paper": PaperBroker,
         # Add more brokers here
         # "fyers": FyersBroker,
         # "upstox": UpstoxBroker,
     }
 
     @classmethod
-    def create(cls, broker_name: str, api_key: str, api_secret: str, user_id: str = None) -> BrokerBase:
+    def create(
+        cls,
+        broker_name: str,
+        api_key: str = "",
+        api_secret: str = "",
+        user_id: str = None,
+        initial_capital: float = 100000
+    ) -> BrokerBase:
         """
         Create a broker instance
 
         Args:
-            broker_name: Name of broker (zerodha, angel, etc.)
+            broker_name: Name of broker (zerodha, angel, paper, etc.)
             api_key: API key/client ID
             api_secret: API secret/password
             user_id: User ID (required for some brokers)
+            initial_capital: Starting capital for paper trading
 
         Returns:
             BrokerBase instance
 
         Example:
+            # Real broker
             broker = BrokerFactory.create(
                 "zerodha",
                 api_key="your_api_key",
                 api_secret="your_api_secret"
             )
+            
+            # Paper trading
+            broker = BrokerFactory.create("paper", initial_capital=50000)
         """
         broker_name = broker_name.lower()
 
@@ -48,6 +62,11 @@ class BrokerFactory:
             raise ValueError(f"Unknown broker: {broker_name}. Available: {available}")
 
         broker_class = cls._brokers[broker_name]
+        
+        # Paper broker has different initialization
+        if broker_name == "paper":
+            return broker_class(initial_capital=initial_capital)
+        
         return broker_class(api_key, api_secret, user_id)
 
     @classmethod

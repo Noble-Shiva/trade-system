@@ -26,9 +26,10 @@ class TradingOrchestrator:
     6. Sends notifications
     """
 
-    def __init__(self, config_path: str = "config/settings.yaml"):
+    def __init__(self, config_path: str = "config/settings.yaml", paper_mode: bool = False):
         # Load configuration
         self.config = self._load_config(config_path)
+        self.paper_mode = paper_mode
 
         # Initialize components
         self.broker = None
@@ -68,12 +69,22 @@ class TradingOrchestrator:
         """Initialize all trading components"""
         # Broker
         broker_config = self.config.get("broker", {})
-        self.broker = BrokerFactory.create(
-            broker_name=broker_config.get("name", "zerodha"),
-            api_key=broker_config.get("api_key", ""),
-            api_secret=broker_config.get("api_secret", ""),
-            user_id=broker_config.get("user_id", "")
-        )
+        
+        if self.paper_mode:
+            # Use paper broker for simulation
+            capital_config = self.config.get("capital", {})
+            self.broker = BrokerFactory.create(
+                broker_name="paper",
+                initial_capital=capital_config.get("initial", 100000)
+            )
+        else:
+            # Use real broker
+            self.broker = BrokerFactory.create(
+                broker_name=broker_config.get("name", "zerodha"),
+                api_key=broker_config.get("api_key", ""),
+                api_secret=broker_config.get("api_secret", ""),
+                user_id=broker_config.get("user_id", "")
+            )
 
         # Data fetcher
         self.data_fetcher = DataFetcher(self.broker)
